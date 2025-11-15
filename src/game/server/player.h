@@ -300,6 +300,9 @@ public:
 
 	virtual void			Jump( void );
 	virtual void			Duck( void );
+	virtual void			KickAttack( void );
+	void					KickThink( void );
+	void					KickDraw( void );
 
 	const char				*GetTracerType( void );
 	void					MakeTracer( const Vector &vecTracerSrc, const trace_t &tr, int iTracerType );
@@ -1080,6 +1083,9 @@ protected:
 	typedef CHandle<CBaseViewModel> CBaseViewModelHandle;
 	CNetworkArray( CBaseViewModelHandle, m_hViewModel, MAX_VIEWMODELS );
 
+#define KICK_VIEWMODEL_INDEX 1
+	CBaseViewModelHandle m_hKickViewModel;
+
 	// Last received usercmd (in case we drop a lot of packets )
 	CUserCmd				m_LastCmd;
 	CUserCmd				*m_pCurrentCommand;
@@ -1112,6 +1118,7 @@ private:
 
 	int						m_nNumCrouches;			// Number of times we've crouched (for hinting)
 	bool					m_bDuckToggled;		// If true, the player is crouching via a toggle
+	bool					m_bIsKicking;
 
 public:
 	bool					GetToggledDuckState( void ) { return m_bDuckToggled; }
