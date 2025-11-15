@@ -196,6 +196,9 @@ ConVar  sv_player_display_usercommand_errors( "sv_player_display_usercommand_err
 
 ConVar  player_debug_print_damage( "player_debug_print_damage", "0", FCVAR_CHEAT, "When true, print amount and type of all damage received by player to console." );
 
+ConVar sv_kick_damage( "sv_kick_damage", "25", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar sv_kick_range( "sv_kick_range", "72", FCVAR_REPLICATED | FCVAR_CHEAT );
+
 
 void CC_GiveCurrentAmmo( void )
 {
@@ -2900,6 +2903,76 @@ void CBasePlayer::Jump()
 {
 }
 
+void CBasePlayer::KickAttack()
+{
+    if (m_bIsKicking)
+        return;
+
+    m_bIsKicking = true;
+
+    CBaseCombatWeapon *pWeapon = GetActiveWeapon();
+    if (pWeapon)
+    {
+        pWeapon->SendWeaponAnim(ACT_VM_HOLSTER);
+    }
+
+    // Time for holster animation.
+    SetNextThink(gpGlobals->curtime + 0.2f);
+    SetThink(&CBasePlayer::KickThink);
+}
+
+void CBasePlayer::KickThink()
+{
+    trace_t tr;
+    Vector forward;
+    EyeVectors(&forward);
+    UTIL_TraceLine(EyePosition(), EyePosition() + forward * sv_kick_range.GetFloat(), MASK_SHOT_HULL, this, COLLISION_GROUP_NONE, &tr);
+
+    Activity kickActivity = ACT_VM_KICK_MISS;
+
+    CBaseEntity *pEntity = tr.m_pEnt;
+    if (pEntity && pEntity->IsNPC())
+    {
+        CTakeDamageInfo info(this, this, sv_kick_damage.GetFloat(), DMG_CLUB);
+        pEntity->TakeDamage(info);
+        kickActivity = ACT_VM_KICK_HIT;
+    }
+
+    CBaseCombatWeapon *pWeapon = GetActiveWeapon();
+    if (pWeapon)
+    {
+        pWeapon->SendWeaponAnim(kickActivity);
+    }
+    else
+    {
+        CBaseViewModel *pVM = GetViewModel();
+        if (pVM)
+        {
+            int iSequence = pVM->SelectWeightedSequence(kickActivity);
+            if (iSequence != ACTIVITY_NOT_AVAILABLE)
+            {
+                pVM->SendViewModelMatchingSequence(iSequence);
+            }
+        }
+    }
+
+    // Time for kick animation.
+    SetNextThink(gpGlobals->curtime + 0.5f);
+    SetThink(&CBasePlayer::KickDraw);
+}
+
+void CBasePlayer::KickDraw()
+{
+    CBaseCombatWeapon *pWeapon = GetActiveWeapon();
+    if (pWeapon)
+    {
+        pWeapon->SendWeaponAnim(ACT_VM_DRAW);
+    }
+
+    m_bIsKicking = false;
+    SetThink(NULL);
+}
+
 void CBasePlayer::Duck( )
 {
 	if (m_nButtons & IN_DUCK) 
@@ -3991,6 +4064,11 @@ void CBasePlayer::PreThink(void)
 		// If on a ladder, jump off the ladder
 		// else Jump
 		Jump();
+	}
+
+	if (m_nButtons & IN_KICK)
+	{
+		KickAttack();
 	}
 
 	// If trying to duck, already ducked, or in the process of ducking
