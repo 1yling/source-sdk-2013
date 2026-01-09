@@ -68,6 +68,7 @@ using namespace vgui;
 void hud_autoreloadscript_callback( IConVar *var, const char *pOldValue, float flOldValue );
 
 ConVar hud_autoreloadscript("hud_autoreloadscript", "0", FCVAR_NONE, "Automatically reloads the animation script each time one is ran", hud_autoreloadscript_callback);
+ConVar ui_hidemenu_title("ui_hidemenu_title", "0", FCVAR_ARCHIVE);
 
 void hud_autoreloadscript_callback( IConVar *var, const char *pOldValue, float flOldValue )
 {
