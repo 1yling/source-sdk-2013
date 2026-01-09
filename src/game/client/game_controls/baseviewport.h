@@ -17,6 +17,7 @@
 #include "vgui/ISurface.h"
 #include "commandmenu.h"
 #include <igameevents.h>
+#include "convar.h"
 
 using namespace vgui;
 
@@ -125,6 +126,9 @@ protected:
 			SetBounds(0,0,w,h);
 
 			BaseClass::PerformLayout();
+
+			extern ConVar ui_hidemenu_title;
+			SetVisible( !ui_hidemenu_title.GetBool() );
 		}
 
 		virtual void OnMousePressed(MouseCode code) { }// don't respond to mouse clicks
