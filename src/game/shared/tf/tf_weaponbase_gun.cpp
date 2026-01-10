@@ -76,6 +76,15 @@ CTFWeaponBaseGun::CTFWeaponBaseGun()
 //-----------------------------------------------------------------------------
 void CTFWeaponBaseGun::PrimaryAttack( void )
 {
+#if defined( CLIENT_DLL )
+	C_TFPlayer *pPlayer = GetTFPlayerOwner();
+	if ( pPlayer && pPlayer->GetViewModel() )
+	{
+		CTFViewModel *pViewModel = (CTFViewModel*)pPlayer->GetViewModel();
+		pViewModel->Kick();
+	}
+#endif
+
 	float flUberChargeAmmoPerShot = UberChargeAmmoPerShot();
 	if ( flUberChargeAmmoPerShot > 0.0f )
 	{

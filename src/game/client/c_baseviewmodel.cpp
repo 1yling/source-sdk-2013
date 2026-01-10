@@ -510,3 +510,20 @@ RenderGroup_t C_BaseViewModel::GetRenderGroup()
 {
 	return RENDER_GROUP_VIEW_MODEL_OPAQUE;
 }
+
+void C_BaseViewModel::Kick()
+{
+	extern ConVar viewmodel_kick_distance;
+	m_flKickAmount = viewmodel_kick_distance.GetFloat();
+}
+
+void C_BaseViewModel::AddViewModelBob( CBasePlayer *owner, Vector& eyePosition, QAngle& eyeAngles )
+{
+	extern ConVar viewmodel_kick_speed;
+	m_flKickAmount = Approach( 0, m_flKickAmount, gpGlobals->frametime * viewmodel_kick_speed.GetFloat() );
+
+	Vector vForward, vRight, vUp;
+	AngleVectors( eyeAngles, &vForward, &vRight, &vUp );
+
+	eyePosition += vForward * -m_flKickAmount;
+}
