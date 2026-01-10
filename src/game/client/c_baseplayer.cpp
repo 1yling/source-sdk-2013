@@ -126,6 +126,9 @@ ConVar demo_fov_override( "demo_fov_override", "0", FCVAR_CLIENTDLL | FCVAR_DONT
 ConVar cl_meathook_neck_pivot_ingame_up( "cl_meathook_neck_pivot_ingame_up", "7.0" );
 ConVar cl_meathook_neck_pivot_ingame_fwd( "cl_meathook_neck_pivot_ingame_fwd", "3.0" );
 
+ConVar viewmodel_kick_distance("viewmodel_kick_distance", "2.0", FCVAR_CLIENTDLL, "The maximum distance the viewmodel kicks back.");
+ConVar viewmodel_kick_speed("viewmodel_kick_speed", "10.0", FCVAR_CLIENTDLL, "The speed at which the viewmodel returns to its original position.");
+
 static ConVar	cl_clean_textures_on_death( "cl_clean_textures_on_death", "0", FCVAR_DEVELOPMENTONLY,  "If enabled, attempts to purge unused textures every time a freeze cam is shown" );
 
 
