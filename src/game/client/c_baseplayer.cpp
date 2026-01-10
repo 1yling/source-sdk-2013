@@ -117,9 +117,7 @@ ConVar	spec_freeze_distance_max( "spec_freeze_distance_max", "200", FCVAR_CHEAT,
 
 static ConVar	cl_first_person_uses_world_model ( "cl_first_person_uses_world_model", "0", FCVAR_NONE, "Causes the third person model to be drawn instead of the view model" );
 
-static ConVar cl_viewmodel_recoil_distance( "cl_viewmodel_recoil_distance", "5", 0, "The maximum distance the viewmodel moves back." );
-static ConVar cl_viewmodel_recoil_speed_out( "cl_viewmodel_recoil_speed_out", "100", 0, "The speed at which the viewmodel moves back." );
-static ConVar cl_viewmodel_recoil_speed_in( "cl_viewmodel_recoil_speed_in", "20", 0, "The speed at which the viewmodel returns to its original position." );
+static ConVar cl_camera_recoil_distance( "cl_camera_recoil_distance", "2.0", 0, "The maximum distance the camera recoils." );
 
 ConVar demo_fov_override( "demo_fov_override", "0", FCVAR_CLIENTDLL | FCVAR_DONTRECORD, "If nonzero, this value will be used to override FOV during demo playback." );
 
@@ -456,8 +454,8 @@ C_BasePlayer::C_BasePlayer() : m_iv_vecViewOffset( "C_BasePlayer::m_iv_vecViewOf
 	m_nForceVisionFilterFlags = 0;
 	m_nLocalPlayerVisionFlags = 0;
 
-	m_bViewModelRecoiling = false;
-	m_vecViewModelRecoil.Init();
+	m_bCameraRecoiling = false;
+	m_vecCameraRecoil.Init();
 
 	ListenForGameEvent( "base_player_teleported" );
 }
@@ -1245,7 +1243,7 @@ bool C_BasePlayer::CreateMove( float flInputSampleTime, CUserCmd *pCmd )
 
 	if ( pCmd->buttons & IN_ATTACK )
 	{
-		m_bViewModelRecoiling = true;
+		m_bCameraRecoiling = true;
 	}
 
 	return true;
@@ -2123,23 +2121,14 @@ void C_BasePlayer::PostThink( void )
 	// Even if dead simulate entities
 	SimulatePlayerSimulatedEntities();
 
-	if ( m_bViewModelRecoiling )
+	if ( m_bCameraRecoiling )
 	{
-		float flOut = cl_viewmodel_recoil_speed_out.GetFloat();
-		float flIn = cl_viewmodel_recoil_speed_in.GetFloat();
-		float flDistance = cl_viewmodel_recoil_distance.GetFloat();
-
-		m_vecViewModelRecoil.x = Approach( -flDistance, m_vecViewModelRecoil.x, flOut * gpGlobals->frametime );
-
-		if ( m_vecViewModelRecoil.x <= -flDistance + 0.1f )
-		{
-			m_bViewModelRecoiling = false;
-		}
+		m_vecCameraRecoil.x = -cl_camera_recoil_distance.GetFloat();
+		m_bCameraRecoiling = false;
 	}
 	else
 	{
-		float flIn = cl_viewmodel_recoil_speed_in.GetFloat();
-		m_vecViewModelRecoil.x = Approach( 0, m_vecViewModelRecoil.x, flIn * gpGlobals->frametime );
+		m_vecCameraRecoil.x = 0;
 	}
 #endif
 }

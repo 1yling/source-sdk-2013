@@ -82,10 +82,10 @@ public:
 	virtual void	Spawn( void );
 	virtual void	SharedSpawn(); // Shared between client and server.
 
-	bool m_bViewModelRecoiling;
-	Vector m_vecViewModelRecoil;
+	bool m_bCameraRecoiling;
+	Vector m_vecCameraRecoil;
 
-	const Vector &GetViewModelRecoil( void ) { return m_vecViewModelRecoil; }
+	const Vector &GetCameraRecoil( void ) { return m_vecCameraRecoil; }
 
 	virtual bool	GetSteamID( CSteamID *pID );
 

@@ -704,6 +704,13 @@ void CViewRender::SetUpViews()
 		g_pClientMode->OverrideView( &viewEye );
 	}
 
+	if ( pPlayer )
+	{
+		Vector vecForward;
+		AngleVectors( viewEye.angles, &vecForward );
+		viewEye.origin += vecForward * pPlayer->GetCameraRecoil().x;
+	}
+
 	// give the toolsystem a chance to override the view
 	ToolFramework_SetupEngineView( viewEye.origin, viewEye.angles, viewEye.fov );
 
@@ -765,10 +772,6 @@ void CViewRender::SetUpViews()
 	{
 		Assert ( pPlayer != NULL );
 		pPlayer->CalcViewModelView ( ViewModelOrigin, ViewModelAngles );
-
-		Vector vecForward;
-		AngleVectors( ViewModelAngles, &vecForward );
-		ViewModelOrigin += vecForward * pPlayer->GetViewModelRecoil().x;
 	}
 
 	// Disable spatial partition access
