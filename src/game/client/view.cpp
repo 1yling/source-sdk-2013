@@ -765,6 +765,10 @@ void CViewRender::SetUpViews()
 	{
 		Assert ( pPlayer != NULL );
 		pPlayer->CalcViewModelView ( ViewModelOrigin, ViewModelAngles );
+
+		Vector vecForward;
+		AngleVectors( ViewModelAngles, &vecForward );
+		ViewModelOrigin += vecForward * pPlayer->GetViewModelRecoil().x;
 	}
 
 	// Disable spatial partition access
