@@ -88,6 +88,7 @@ protected:
 	virtual float	CalcRoll( const QAngle &angles, const Vector &velocity, float rollangle, float rollspeed );
 
 	virtual	void	DecayPunchAngle( void );
+	virtual void	DecayFOVPunch( void );
 
 	virtual void	CheckWaterJump(void );
 

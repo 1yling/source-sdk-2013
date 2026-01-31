@@ -50,6 +50,9 @@ BEGIN_SEND_TABLE_NOBASE( CPlayerLocalData, DT_Local )
 	SendPropVector	(SENDINFO(m_vecPunchAngle),      -1,  SPROP_COORD|SPROP_CHANGES_OFTEN),
 	SendPropVector	(SENDINFO(m_vecPunchAngleVel),   -1,  SPROP_COORD| SPROP_CHANGES_OFTEN ),
 #endif
+	SendPropFloat	(SENDINFO(m_flFOVPunch), 0, SPROP_NOSCALE | SPROP_CHANGES_OFTEN ),
+	SendPropFloat	(SENDINFO(m_flFOVPunchVel), 0, SPROP_NOSCALE | SPROP_CHANGES_OFTEN ),
+
 	SendPropInt		(SENDINFO(m_bDrawViewmodel), 1, SPROP_UNSIGNED ),
 	SendPropInt		(SENDINFO(m_bWearingSuit), 1, SPROP_UNSIGNED ),
 	SendPropBool	(SENDINFO(m_bPoisoned)),
@@ -157,6 +160,8 @@ BEGIN_SIMPLE_DATADESC( CPlayerLocalData )
 	DEFINE_FIELD( m_flOldForwardMove, FIELD_FLOAT ),
 	DEFINE_FIELD( m_vecPunchAngle, FIELD_VECTOR ),
 	DEFINE_FIELD( m_vecPunchAngleVel, FIELD_VECTOR ),
+	DEFINE_FIELD( m_flFOVPunch, FIELD_FLOAT ),
+	DEFINE_FIELD( m_flFOVPunchVel, FIELD_FLOAT ),
 	DEFINE_FIELD( m_bDrawViewmodel, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bWearingSuit, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bPoisoned, FIELD_BOOLEAN ),
@@ -191,6 +196,10 @@ CPlayerLocalData::CPlayerLocalData()
 	m_audio.soundscapeIndex = 0;
 	m_audio.localBits = 0;
 	m_audio.entIndex = 0;
+
+	m_flFOVPunch = 0.0f;
+	m_flFOVPunchVel = 0.0f;
+
 	m_pOldSkyCamera = NULL;
 	m_bDrawViewmodel = true;
 

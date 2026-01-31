@@ -1415,6 +1415,14 @@ void CBasePlayer::ViewPunch( const QAngle &angleOffset )
 	m_Local.m_vecPunchAngleVel += angleOffset * 20;
 }
 
+void CBasePlayer::ViewPunchFOV( float magnitude )
+{
+	if ( IsInAVehicle() )
+		return;
+
+	m_Local.m_flFOVPunchVel += magnitude * 20;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -1636,7 +1644,7 @@ void CBasePlayer::CalcPlayerView( Vector& eyeOrigin, QAngle& eyeAngles, float& f
 #endif
 
 	// calc current FOV
-	fov = GetFOV();
+	fov = GetFOV() + m_Local.m_flFOVPunch;
 }
 
 //-----------------------------------------------------------------------------
@@ -1770,6 +1778,8 @@ void CBasePlayer::CalcViewRoll( QAngle& eyeAngles )
 
 void CBasePlayer::DoMuzzleFlash()
 {
+	ViewPunchFOV( 10.0f );
+
 	for ( int i = 0; i < MAX_VIEWMODELS; i++ )
 	{
 		CBaseViewModel *vm = GetViewModel( i );
