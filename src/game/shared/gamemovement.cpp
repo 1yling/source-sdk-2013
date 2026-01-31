@@ -1047,6 +1047,7 @@ void CGameMovement::CheckParameters( void )
 	}
 
 	DecayPunchAngle();
+	DecayFOVPunch();
 
 	// Take angles from command.
 	if ( !IsDead() )
@@ -1120,6 +1121,35 @@ void CGameMovement::ReduceTimers( void )
 		{
 			player->m_flSwimSoundTime = 0;
 		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Decays the FOV punch toward 0.
+//-----------------------------------------------------------------------------
+void CGameMovement::DecayFOVPunch( void )
+{
+	if ( fabs(player->m_Local.m_flFOVPunch) > 0.001f || fabs(player->m_Local.m_flFOVPunchVel) > 0.001f )
+	{
+		player->m_Local.m_flFOVPunch += player->m_Local.m_flFOVPunchVel * gpGlobals->frametime;
+		float damping = 1 - (PUNCH_DAMPING * gpGlobals->frametime);
+
+		if ( damping < 0 )
+		{
+			damping = 0;
+		}
+		player->m_Local.m_flFOVPunchVel *= damping;
+
+		float springForceMagnitude = PUNCH_SPRING_CONSTANT * gpGlobals->frametime;
+		springForceMagnitude = clamp(springForceMagnitude, 0.f, 2.f );
+		player->m_Local.m_flFOVPunchVel -= player->m_Local.m_flFOVPunch * springForceMagnitude;
+
+		player->m_Local.m_flFOVPunch = clamp(player->m_Local.m_flFOVPunch, -45.f, 45.f );
+	}
+	else
+	{
+		player->m_Local.m_flFOVPunch = 0;
+		player->m_Local.m_flFOVPunchVel = 0;
 	}
 }
 
