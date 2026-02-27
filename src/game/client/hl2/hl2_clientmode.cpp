@@ -39,6 +39,7 @@ static void SkillChangedCallback( IConVar *var, const char *pOldValue, float flO
 	}
 }
 
+
 class CHLModeManager : public IVModeManager
 {
 public:
