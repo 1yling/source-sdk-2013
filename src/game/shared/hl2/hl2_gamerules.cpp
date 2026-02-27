@@ -292,9 +292,24 @@ void CHalfLife2::OnSkillLevelChanged( int iNewLevel )
 		if ( IsSkillLevel( SKILL_HARD ) )
 		{
 			const char *pCmd = args.Arg( 0 );
+			bool bBlock = false;
 			if ( Q_stricmp( pCmd, "save" ) == 0 || Q_stricmp( pCmd, "load" ) == 0 ||
 				 Q_stricmp( pCmd, "quicksave" ) == 0 || Q_stricmp( pCmd, "quickload" ) == 0 ||
-				 Q_stricmp( pCmd, "minisave" ) == 0 )
+				 Q_stricmp( pCmd, "minisave" ) == 0 || Q_stricmp( pCmd, "OpenSaveGameDialog" ) == 0 ||
+				 Q_stricmp( pCmd, "OpenLoadGameDialog" ) == 0 )
+			{
+				bBlock = true;
+			}
+			else if ( Q_stricmp( pCmd, "gamemenucommand" ) == 0 && args.ArgC() > 1 )
+			{
+				const char *pSubCmd = args.Arg( 1 );
+				if ( Q_stricmp( pSubCmd, "OpenSaveGameDialog" ) == 0 || Q_stricmp( pSubCmd, "OpenLoadGameDialog" ) == 0 )
+				{
+					bBlock = true;
+				}
+			}
+
+			if ( bBlock )
 			{
 				ClientPrint( (CBasePlayer *)pEdict, HUD_PRINTTALK, "Saving and loading are disabled in ULTRA-NIGHTMARE mode!" );
 				return true;

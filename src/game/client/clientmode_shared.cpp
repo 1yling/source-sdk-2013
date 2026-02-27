@@ -703,19 +703,30 @@ int	ClientModeShared::KeyInput( int down, ButtonCode_t keynum, const char *pszCu
 		if ( skill.IsValid() && skill.GetInt() == 3 )
 		{
 			bool bBlock = false;
-			const char *pCommands[] = { "save", "load", "quicksave", "quickload", "minisave" };
-			for ( int i = 0; i < ARRAYSIZE( pCommands ); ++i )
+			const char *pBlocked[] = { "save", "load", "quicksave", "quickload", "minisave", "OpenSaveGameDialog", "OpenLoadGameDialog" };
+			for ( int i = 0; i < ARRAYSIZE( pBlocked ); ++i )
 			{
-				int len = Q_strlen( pCommands[i] );
-				if ( Q_strnicmp( pszCurrentBinding, pCommands[i], len ) == 0 )
+				const char *pMatch = Q_stristr( pszCurrentBinding, pBlocked[i] );
+				while ( pMatch )
 				{
-					// Ensure it's a full word match (either end of string or followed by space/semicolon)
-					if ( pszCurrentBinding[len] == '\0' || pszCurrentBinding[len] == ' ' || pszCurrentBinding[len] == ';' )
+					// Check start boundary
+					bool bStart = ( pMatch == pszCurrentBinding ) || ( *(pMatch - 1) == ' ' ) || ( *(pMatch - 1) == ';' ) || ( *(pMatch - 1) == '"' );
+					if ( bStart )
 					{
-						bBlock = true;
-						break;
+						int len = Q_strlen( pBlocked[i] );
+						// Check end boundary
+						char endChar = pMatch[len];
+						bool bEnd = ( endChar == '\0' ) || ( endChar == ' ' ) || ( endChar == ';' ) || ( endChar == '"' );
+						if ( bEnd )
+						{
+							bBlock = true;
+							break;
+						}
 					}
+					pMatch = Q_stristr( pMatch + 1, pBlocked[i] );
 				}
+				if ( bBlock )
+					break;
 			}
 
 			if ( bBlock )
