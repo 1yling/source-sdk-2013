@@ -696,6 +696,41 @@ int	ClientModeShared::KeyInput( int down, ButtonCode_t keynum, const char *pszCu
 		return 0;
 	}
 	
+	// If we're in ULTRA-NIGHTMARE mode, block save/load commands
+	if ( pszCurrentBinding && ( gpGlobals->maxClients == 1 ) )
+	{
+		static ConVarRef skill( "skill" );
+		if ( skill.IsValid() && skill.GetInt() == 3 )
+		{
+			bool bBlock = false;
+			const char *pCommands[] = { "save", "load", "quicksave", "quickload", "minisave" };
+			for ( int i = 0; i < ARRAYSIZE( pCommands ); ++i )
+			{
+				int len = Q_strlen( pCommands[i] );
+				if ( Q_strnicmp( pszCurrentBinding, pCommands[i], len ) == 0 )
+				{
+					// Ensure it's a full word match (either end of string or followed by space/semicolon)
+					if ( pszCurrentBinding[len] == '\0' || pszCurrentBinding[len] == ' ' || pszCurrentBinding[len] == ';' )
+					{
+						bBlock = true;
+						break;
+					}
+				}
+			}
+
+			if ( bBlock )
+			{
+				if ( down && m_pChatElement )
+				{
+					char szMsg[128];
+					Q_snprintf( szMsg, sizeof( szMsg ), "Saving and loading are disabled in ULTRA-NIGHTMARE mode!" );
+					m_pChatElement->ChatPrintf( 0, CHAT_FILTER_NONE, "%s", szMsg );
+				}
+				return 0;
+			}
+		}
+	}
+
 	// If we're voting...
 #ifdef VOTING_ENABLED
 	CHudVote *pHudVote = GET_HUDELEMENT( CHudVote );
