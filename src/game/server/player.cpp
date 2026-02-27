@@ -80,7 +80,9 @@
 #ifdef HL2_DLL
 #include "combine_mine.h"
 #include "weapon_physcannon.h"
+#include "hl2_gamerules.h"
 #endif
+#include "filesystem.h"
 
 ConVar autoaim_max_dist( "autoaim_max_dist", "2160" ); // 2160 = 180 feet
 ConVar autoaim_max_deflect( "autoaim_max_deflect", "0.99" );
@@ -1746,6 +1748,40 @@ void CBasePlayer::Event_Killed( const CTakeDamageInfo &info )
 	m_flDeathTime = gpGlobals->curtime;
 
 	ClearLastKnownArea();
+
+#ifdef HL2_DLL
+	if ( g_pGameRules->IsSkillLevel( SKILL_HARD ) )
+	{
+		// Delete all saves
+		FileFindHandle_t findHandle;
+		const char *pFileName = g_pFullFileSystem->FindFirstEx( "save/*.sav", "MOD", &findHandle );
+		while ( pFileName )
+		{
+			char szFullPath[MAX_PATH];
+			Q_snprintf( szFullPath, sizeof(szFullPath), "save/%s", pFileName );
+			g_pFullFileSystem->RemoveFile( szFullPath, "MOD" );
+			pFileName = g_pFullFileSystem->FindNext( findHandle );
+		}
+		g_pFullFileSystem->FindClose( findHandle );
+
+		pFileName = g_pFullFileSystem->FindFirstEx( "save/*.tga", "MOD", &findHandle );
+		while ( pFileName )
+		{
+			char szFullPath[MAX_PATH];
+			Q_snprintf( szFullPath, sizeof(szFullPath), "save/%s", pFileName );
+			g_pFullFileSystem->RemoveFile( szFullPath, "MOD" );
+			pFileName = g_pFullFileSystem->FindNext( findHandle );
+		}
+		g_pFullFileSystem->FindClose( findHandle );
+
+		// Ensure normal death flags are set before changing level
+		BaseClass::Event_Killed( info );
+
+		// Restart at d1_trainstation_05
+		engine->ChangeLevel( "d1_trainstation_05", NULL );
+		return;
+	}
+#endif
 
 	BaseClass::Event_Killed( info );
 }

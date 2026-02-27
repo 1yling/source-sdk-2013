@@ -45,6 +45,7 @@ public:
 	virtual float			GetAutoAimScale( CBasePlayer *pPlayer );
 	virtual float			GetAmmoQuantityScale( int iAmmoIndex );
 	virtual void			LevelInitPreEntity();
+	virtual void			OnSkillLevelChanged( int iNewLevel );
 #endif
 
 private:
