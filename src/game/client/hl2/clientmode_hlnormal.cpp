@@ -95,5 +95,22 @@ bool ClientModeHLNormal::ShouldDrawCrosshair( void )
 	return ( g_bRollingCredits == false );
 }
 
+int ClientModeHLNormal::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
+{
+	if ( down && pszCurrentBinding )
+	{
+		static ConVarRef skill( "skill" );
+		if ( skill.IsValid() && skill.GetInt() == 3 )
+		{
+			if ( Q_strstr( pszCurrentBinding, "save" ) || Q_strstr( pszCurrentBinding, "load" ) )
+			{
+				// Block save/load related keys in ULTRA-NIGHTMARE
+				return 0;
+			}
+		}
+	}
+
+	return BaseClass::KeyInput( down, keynum, pszCurrentBinding );
+}
 
 

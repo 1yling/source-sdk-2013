@@ -33,6 +33,7 @@ public:
 
 	virtual void	Init();
 	virtual bool	ShouldDrawCrosshair( void );
+	virtual int		KeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding );
 };
 
 extern IClientMode *GetClientModeNormal();
