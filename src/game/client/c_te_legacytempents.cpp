@@ -1690,6 +1690,11 @@ void CTempEnts::EjectBrass( const Vector &pos1, const QAngle &angles, const QAng
 	{
 		pTemp->hitSound = BOUNCE_SHOTSHELL;
 	}
+	else if ( type == 3 )
+	{
+		pTemp->hitSound = BOUNCE_METAL;
+		pTemp->AddParticleEffect( "hl2mmod_misc_temp_shellexhaust" );
+	}
 	else
 	{
 		pTemp->hitSound = BOUNCE_SHELL;
@@ -2436,6 +2441,7 @@ void CTempEnts::LevelInit()
 	m_pShells[0] = (model_t *) engine->LoadModel( "models/weapons/shell.mdl" );
 	m_pShells[1] = (model_t *) engine->LoadModel( "models/weapons/rifleshell.mdl" );
 	m_pShells[2] = (model_t *) engine->LoadModel( "models/weapons/shotgun_shell.mdl" );
+	m_pShells[3] = (model_t *) engine->LoadModel( "models/weapons/ar2_shell.mdl" );
 #endif
 
 #if defined( HL1_CLIENT_DLL )
@@ -2474,6 +2480,7 @@ void CTempEnts::Init (void)
 	m_pShells[0] = NULL;
 	m_pShells[1] = NULL;
 	m_pShells[2] = NULL;
+	m_pShells[3] = NULL;
 
 #if defined( HL1_CLIENT_DLL )
 	m_pHL1Shell			= NULL;
