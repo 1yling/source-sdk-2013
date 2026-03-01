@@ -13,9 +13,11 @@
 #ifdef GAME_DLL
 #include "te_effect_dispatch.h"
 #include "networkstringtable_gamedll.h"
+void PrecacheParticleSystem( const char *pParticleSystemName );
 #else
 #include "c_te_effect_dispatch.h"
 #include "networkstringtable_clientdll.h"
+extern void PrecacheParticleSystem( const char *pParticleSystemName );
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -104,6 +106,36 @@ void ParseParticleEffects( bool bLoadSheets, bool bPrecache )
 	for ( int i = 0; i < nCount; ++i )
 	{
 		g_pParticleSystemMgr->ReadParticleConfigFile( files[i], bPrecache, false );
+	}
+
+	// MMod custom particles
+	static const char *pszCustomParticleFiles[] =
+	{
+		"particles/hl2mmod_blood.pcf",
+		"particles/hl2mmod_combineenergystuff.pcf",
+		"particles/hl2mmod_tracers.pcf",
+		"particles/hl2mmod_muzzleflashes.pcf",
+		"particles/hl2mmod_muzzleflashes_npc.pcf",
+		"particles/hl2mmod_misc.pcf",
+		"particles/hl2mmod_egon.pcf",
+		"particles/hl2mmod_weaponeffects.pcf",
+		"particles/hl2mmod_impacts.pcf",
+		"particles/hl2mmod_envfire.pcf",
+		"particles/hl2mmod_explosions.pcf",
+		"particles/hl2mmod_water_effects.pcf",
+		"particles/hl2mmod_breakables.pcf",
+		"particles/hl2mmod_explosion_remix.pcf",
+		"particles/hl2mmod_explosion_barrel.pcf",
+		"particles/hl2mmod_airboat.pcf",
+		"particles/hl2mmod_gauss_buggy.pcf",
+		"particles/hl2mmod_gauss_player.pcf",
+		"particles/hl2mmod_burning_fx.pcf",
+		"particles/hunter_projectile.pcf",
+	};
+
+	for ( int i = 0; i < ARRAYSIZE(pszCustomParticleFiles); ++i )
+	{
+		g_pParticleSystemMgr->ReadParticleConfigFile( pszCustomParticleFiles[i], bPrecache, false );
 	}
 
 	g_pParticleSystemMgr->DecommitTempMemory();
@@ -259,7 +291,6 @@ void ParseParticleEffectsMap( const char *pMapName, bool bLoadSheets )
 //-----------------------------------------------------------------------------
 void PrecacheStandardParticleSystems( )
 {
-#ifdef GAME_DLL
 	int nTotalPrecacheCount = 0;
 	// Now add each particle system name to the network string pool, so we can send string_t's 
 	// down to the client instead of full particle system names.
@@ -267,13 +298,26 @@ void PrecacheStandardParticleSystems( )
 	{
 		const char *pParticleSystemName = g_pParticleSystemMgr->GetParticleSystemNameFromIndex(i);
 		CParticleSystemDefinition *pParticleSystem = g_pParticleSystemMgr->FindParticleSystem( pParticleSystemName );
-		if ( pParticleSystem->ShouldAlwaysPrecache() )
+
+		bool bPrecache = pParticleSystem->ShouldAlwaysPrecache();
+
+		// MMod custom precache logic
+		if ( !bPrecache && pParticleSystemName )
+		{
+			if ( Q_strnicmp( pParticleSystemName, "hl2mmod_", 8 ) == 0 ||
+				 Q_strnicmp( pParticleSystemName, "hunter_flechette_trail", 22 ) == 0 ||
+				 Q_strnicmp( pParticleSystemName, "weapon_cleanup_forfuckssakejustwork", 35 ) == 0 )
+			{
+				bPrecache = true;
+			}
+		}
+
+		if ( bPrecache )
 		{
 			PrecacheParticleSystem( pParticleSystemName );
 			nTotalPrecacheCount++;
 		}
 	}
-#endif // GAME_DLL
 }
 
 

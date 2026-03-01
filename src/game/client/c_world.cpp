@@ -13,6 +13,7 @@
 #include "ivieweffects.h"
 #include "shake.h"
 #include "eventlist.h"
+#include "particle_parse.h"
 // NVNT haptic include for notification of world precache
 #include "haptics/haptic_utils.h"
 // memdbgon must be the last include file in a .cpp file!!!
@@ -160,6 +161,8 @@ void W_Precache(void)
 
 void C_World::Precache( void )
 {
+	PrecacheStandardParticleSystems();
+
 	// UNDONE: Make most of these things server systems or precache_registers
 	// =================================================
 	//	Activities
