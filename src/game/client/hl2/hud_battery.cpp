@@ -49,7 +49,7 @@ private:
 	int		m_iBat;	
 	int		m_iNewBat;
 
-	CPanelAnimationVar( vgui::HFont, m_hIconFont, "IconFont", "WeaponIconsSmall" );
+	CPanelAnimationVar( vgui::HFont, m_hIconFont, "IconFont", "Halflife2" );
 	CPanelAnimationVarAliasType( float, m_flIconX, "icon_xpos", "0", "proportional_float" );
 	CPanelAnimationVarAliasType( float, m_flIconY, "icon_ypos", "0", "proportional_float" );
 };
