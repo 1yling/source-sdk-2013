@@ -186,6 +186,13 @@ Activity CWeaponAR2::GetPrimaryAttackActivity( void )
 //-----------------------------------------------------------------------------
 void CWeaponAR2::DoImpactEffect( trace_t &tr, int nDamageType )
 {
+	// MMod Impact Effects
+	DispatchParticleEffect( "hl2mmod_impact_ar2", tr.endpos, tr.plane.normal, NULL );
+	DispatchParticleEffect( "hl2mmod_impact_ar2_flash", tr.endpos, tr.plane.normal, NULL );
+
+	if ( random->RandomInt( 0, 1 ) == 0 )
+		DispatchParticleEffect( "hl2mmod_impact_ar2_spikes_new", tr.endpos, tr.plane.normal, NULL );
+
 	CEffectData data;
 
 	data.m_vOrigin = tr.endpos + ( tr.plane.normal * 1.0f );
