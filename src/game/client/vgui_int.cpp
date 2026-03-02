@@ -41,6 +41,7 @@ void MP3Player_Destroy();
 vgui::IInputInternal *g_InputInternal = NULL;
 
 #include <vgui_controls/Controls.h>
+#include <vgui/ILocalize.h>
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -56,6 +57,33 @@ void SetVGUICursorPos( int x, int y )
 	{
 		vgui::input()->SetCursorPos(x, y);
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Loads all custom localization files from the resource/ directory
+//-----------------------------------------------------------------------------
+void VGui_LoadCustomLocalizationFiles()
+{
+	char szLanguage[64];
+	if ( !engine || !g_pVGuiLocalize )
+		return;
+
+	engine->GetUILanguage( szLanguage, sizeof( szLanguage ) );
+
+	char szSearchPath[MAX_PATH];
+	Q_snprintf( szSearchPath, sizeof( szSearchPath ), "resource/*_%s.txt", szLanguage );
+
+	FileFindHandle_t hFind;
+	const char *pFileName = g_pFullFileSystem->FindFirstEx( szSearchPath, "GAME", &hFind );
+	while ( pFileName )
+	{
+		char szFullFilePath[MAX_PATH];
+		Q_snprintf( szFullFilePath, sizeof( szFullFilePath ), "resource/%s", pFileName );
+		g_pVGuiLocalize->AddFile( szFullFilePath, "GAME", true );
+
+		pFileName = g_pFullFileSystem->FindNext( hFind );
+	}
+	g_pFullFileSystem->FindClose( hFind );
 }
 
 class CHudTextureHandleProperty : public vgui::IPanelAnimationPropertyConverter
@@ -187,6 +215,9 @@ bool VGui_Startup( CreateInterfaceFn appSystemFactory )
 	{
 		return false;
 	}
+
+	VGui_LoadCustomLocalizationFiles();
+
 	return true;
 }
 
