@@ -81,6 +81,12 @@ public:
 
 	virtual void	Spawn( void );
 	virtual void	SharedSpawn(); // Shared between client and server.
+
+	bool m_bCameraRecoiling;
+	Vector m_vecCameraRecoil;
+
+	const Vector &GetCameraRecoil( void ) { return m_vecCameraRecoil; }
+
 	virtual bool	GetSteamID( CSteamID *pID );
 
 	// IClientEntity overrides.
