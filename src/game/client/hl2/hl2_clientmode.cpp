@@ -9,6 +9,9 @@
 #include "ivmodemanager.h"
 #include "clientmode_hlnormal.h"
 #include "panelmetaclassmgr.h"
+#include <vgui_controls/MessageBox.h>
+#include "ienginevgui.h"
+#include "gamerules.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -20,6 +23,22 @@ ConVar default_fov( "default_fov", "75", FCVAR_CHEAT );
 IClientMode *g_pClientMode = NULL;
 
 #define SCREEN_FILE		"scripts/vgui_screens.txt"
+
+static void SkillChangedCallback( IConVar *var, const char *pOldValue, float flOldValue )
+{
+	ConVarRef skill( var );
+	if ( skill.GetInt() == 3 )
+	{
+		vgui::MessageBox *pBox = new vgui::MessageBox( "ULTRA-NIGHTMARE",
+			"You have selected ULTRA-NIGHTMARE difficulty.\n\n"
+			"All your saves will be deleted upon death and cannot be recovered!\n"
+			"Saving and loading are disabled in this mode.",
+			enginevgui->GetPanel( PANEL_CLIENTDLL ) );
+		pBox->SetTitle( "ULTRA-NIGHTMARE WARNING", true );
+		pBox->DoModal();
+	}
+}
+
 
 class CHLModeManager : public IVModeManager
 {
@@ -47,6 +66,12 @@ void CHLModeManager::Init( void )
 {
 	g_pClientMode = GetClientModeNormal();
 	PanelMetaClassMgr()->LoadMetaClassDefinitionFile( SCREEN_FILE );
+
+	static ConVarRef skill( "skill" );
+	if ( skill.IsValid() )
+	{
+		skill.GetPointer()->InstallChangeCallback( SkillChangedCallback );
+	}
 }
 
 void CHLModeManager::SwitchMode( bool commander, bool force )

@@ -76,7 +76,7 @@ ConVar	sv_robust_explosions( "sv_robust_explosions","1", FCVAR_REPLICATED );
 // Damage scale for damage inflicted by the player on each skill level.
 ConVar	sk_dmg_inflict_scale1( "sk_dmg_inflict_scale1", "1.50", FCVAR_REPLICATED );
 ConVar	sk_dmg_inflict_scale2( "sk_dmg_inflict_scale2", "1.00", FCVAR_REPLICATED );
-ConVar	sk_dmg_inflict_scale3( "sk_dmg_inflict_scale3", "0.75", FCVAR_REPLICATED );
+ConVar	sk_dmg_inflict_scale3( "sk_dmg_inflict_scale3", "1.00", FCVAR_REPLICATED );
 
 // Damage scale for damage taken by the player on each skill level.
 ConVar	sk_dmg_take_scale1( "sk_dmg_take_scale1", "0.50", FCVAR_REPLICATED );
@@ -219,6 +219,32 @@ bool CHalfLife2::Damage_IsTimeBased( int iDmgType )
 ConVar  alyx_darkness_force( "alyx_darkness_force", "0", FCVAR_CHEAT | FCVAR_REPLICATED );
 #endif // HL2_EPISODIC
 
+void CHalfLife2::OnSkillLevelChanged( int iNewLevel )
+{
+	if ( iNewLevel == SKILL_HARD )
+	{
+		hudtextparms_t params;
+		params.x = -1;
+		params.y = 0.4;
+		params.effect = 0;
+		params.r1 = 255;
+		params.g1 = 0;
+		params.b1 = 0;
+		params.a1 = 255;
+		params.r2 = 255;
+		params.g2 = 255;
+		params.b2 = 255;
+		params.a2 = 255;
+		params.fadeinTime = 0.1;
+		params.fadeoutTime = 0.1;
+		params.holdTime = 5.0;
+		params.fxTime = 0.5;
+		params.channel = 1;
+
+		UTIL_HudMessageAll( params, "ULTRA-NIGHTMARE\nAll saves will be deleted upon death!" );
+	}
+}
+
 #endif // CLIENT_DLL
 
 
@@ -263,6 +289,20 @@ ConVar  alyx_darkness_force( "alyx_darkness_force", "0", FCVAR_CHEAT | FCVAR_REP
 	//-----------------------------------------------------------------------------
 	bool CHalfLife2::ClientCommand( CBaseEntity *pEdict, const CCommand &args )
 	{
+		if ( IsSkillLevel( SKILL_HARD ) )
+		{
+			const char *pCmd = args.Arg( 0 );
+			if ( Q_stricmp( pCmd, "save" ) == 0 || Q_stricmp( pCmd, "load" ) == 0 ||
+				 Q_stricmp( pCmd, "quicksave" ) == 0 || Q_stricmp( pCmd, "quickload" ) == 0 ||
+				 Q_stricmp( pCmd, "autosave" ) == 0 ||
+				 Q_stricmp( pCmd, "OpenLoadGameDialog" ) == 0 ||
+				 Q_stricmp( pCmd, "OpenSaveGameDialog" ) == 0 )
+			{
+				ClientPrint( (CBasePlayer *)pEdict, HUD_PRINTTALK, "Saving and loading are disabled in ULTRA-NIGHTMARE mode!" );
+				return true;
+			}
+		}
+
 		if( BaseClass::ClientCommand( pEdict, args ) )
 			return true;
 
@@ -1335,6 +1375,15 @@ ConVar  alyx_darkness_force( "alyx_darkness_force", "0", FCVAR_CHEAT | FCVAR_REP
 		{
 			// FIXME: Is there a better place for this?
 			m_bMegaPhysgun = ( GlobalEntity_GetState("super_phys_gun") == GLOBAL_ON );
+		}
+
+		if ( IsSkillLevel( SKILL_HARD ) )
+		{
+			static ConVarRef sv_autosave( "sv_autosave" );
+			if ( sv_autosave.IsValid() )
+			{
+				sv_autosave.SetValue( 0 );
+			}
 		}
 	}
 
