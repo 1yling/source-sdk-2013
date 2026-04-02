@@ -19,6 +19,7 @@
 
 #include "vgui_controls/AnimationController.h"
 #include "vgui/ILocalize.h"
+#include <vgui/ISurface.h>
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -40,10 +41,17 @@ public:
 	void OnThink( void );
 	void MsgFunc_Battery(bf_read &msg );
 	bool ShouldDraw();
+
+protected:
+	virtual void Paint();
 	
 private:
 	int		m_iBat;	
 	int		m_iNewBat;
+
+	CPanelAnimationVar( vgui::HFont, m_hIconFont, "IconFont", "Halflife2" );
+	CPanelAnimationVarAliasType( float, m_flIconX, "icon_xpos", "0", "proportional_float" );
+	CPanelAnimationVarAliasType( float, m_flIconY, "icon_ypos", "0", "proportional_float" );
 };
 
 DECLARE_HUDELEMENT( CHudBattery );
@@ -144,4 +152,32 @@ void CHudBattery::OnThink( void )
 void CHudBattery::MsgFunc_Battery( bf_read &msg )
 {
 	m_iNewBat = msg.ReadShort();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CHudBattery::Paint()
+{
+	BaseClass::Paint();
+
+	if ( m_iBat <= 0 )
+		return;
+
+	int nLabelHeight;
+	int nLabelWidth;
+	vgui::surface()->GetTextSize( m_hTextFont, m_LabelText, nLabelWidth, nLabelHeight );
+
+	int nIconHeight;
+	int nIconWidth;
+	wchar_t pIcon[2] = L"*";
+	vgui::surface()->GetTextSize( m_hIconFont, pIcon, nIconWidth, nIconHeight );
+
+	int x = text_xpos + ( nLabelWidth - nIconWidth ) / 2 + m_flIconX;
+	int y = text_ypos - nIconHeight + m_flIconY;
+
+	vgui::surface()->DrawSetTextFont( m_hIconFont );
+	vgui::surface()->DrawSetTextColor( GetFgColor() );
+	vgui::surface()->DrawSetTextPos( x, y );
+	vgui::surface()->DrawUnicodeChar( '*' );
 }
