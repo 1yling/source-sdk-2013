@@ -38,6 +38,26 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+static int ScalePitchForTimescale( int nPitch )
+{
+	static ConVarRef host_timescale( "host_timescale" );
+	static ConVarRef sv_cheats( "sv_cheats" );
+
+	if ( host_timescale.IsValid() )
+	{
+		float flTimescale = host_timescale.GetFloat();
+		if ( flTimescale != 1.0f && flTimescale > 0.0f )
+		{
+			if ( sv_cheats.IsValid() && sv_cheats.GetBool() )
+			{
+				nPitch = (int)( (float)nPitch * flTimescale );
+				nPitch = clamp( nPitch, 1, 255 );
+			}
+		}
+	}
+	return nPitch;
+}
+
 static ConVar sv_soundemitter_trace( "sv_soundemitter_trace", "0", FCVAR_REPLICATED, "Show all EmitSound calls including their symbolic name and the actual wave file they resolved to\n" );
 
 extern ISoundEmitterSystemBase *soundemitterbase;
@@ -512,6 +532,8 @@ public:
 			st = gpGlobals->curtime + (float)params.delay_msec / 1000.f;
 		}
 
+		params.pitch = ScalePitchForTimescale( params.pitch );
+
 		enginesound->EmitSound( 
 			filter, 
 			entindex, 
@@ -593,7 +615,7 @@ public:
 				ep.m_flVolume, 
 				ep.m_SoundLevel, 
 				ep.m_nFlags, 
-				ep.m_nPitch, 
+				ScalePitchForTimescale( ep.m_nPitch ),
 				ep.m_nSpecialDSP,
 				ep.m_pOrigin,
 				NULL, 
@@ -809,6 +831,8 @@ public:
 			params.volume = flVolume;
 		}
 
+		params.pitch = ScalePitchForTimescale( params.pitch );
+
 #if defined( CLIENT_DLL )
 		enginesound->EmitAmbientSound( params.soundname, params.volume, params.pitch, iFlags, soundtime );
 #else
@@ -931,10 +955,11 @@ public:
 
 		if ( pSample && ( Q_stristr( pSample, ".wav" ) || Q_stristr( pSample, ".mp3" )) )
 		{
+			int nScaledPitch = ScalePitchForTimescale( pitch );
 #if defined( CLIENT_DLL )
-			enginesound->EmitAmbientSound( pSample, volume, pitch, flags, soundtime );
+			enginesound->EmitAmbientSound( pSample, volume, nScaledPitch, flags, soundtime );
 #else
-			engine->EmitAmbientSound( entindex, origin, pSample, volume, soundlevel, flags, pitch, soundtime );
+			engine->EmitAmbientSound( entindex, origin, pSample, volume, soundlevel, flags, nScaledPitch, soundtime );
 #endif
 
 			if ( duration )
@@ -1361,7 +1386,6 @@ int SENTENCEG_Lookup(const char *sample)
 
 void UTIL_EmitAmbientSound( int entindex, const Vector &vecOrigin, const char *samp, float vol, soundlevel_t soundlevel, int fFlags, int pitch, float soundtime /*= 0.0f*/, float *duration /*=NULL*/ )
 {
-
 	if (samp && *samp == '!')
 	{
 		int sentenceIndex = SENTENCEG_Lookup(samp);
@@ -1369,10 +1393,13 @@ void UTIL_EmitAmbientSound( int entindex, const Vector &vecOrigin, const char *s
 		{
 			char name[32];
 			Q_snprintf( name, sizeof(name), "!%d", sentenceIndex );
+
+			int nScaledPitch = ScalePitchForTimescale( pitch );
+
 #if !defined( CLIENT_DLL )
-			engine->EmitAmbientSound( entindex, vecOrigin, name, vol, soundlevel, fFlags, pitch, soundtime );
+			engine->EmitAmbientSound( entindex, vecOrigin, name, vol, soundlevel, fFlags, nScaledPitch, soundtime );
 #else
-			enginesound->EmitAmbientSound( name, vol, pitch, fFlags, soundtime );
+			enginesound->EmitAmbientSound( name, vol, nScaledPitch, fFlags, soundtime );
 #endif
 			if ( duration )
 			{
@@ -1385,6 +1412,7 @@ void UTIL_EmitAmbientSound( int entindex, const Vector &vecOrigin, const char *s
 	}
 	else
 	{
+		// g_SoundEmitterSystem.EmitAmbientSound will scale the pitch internally.
 		g_SoundEmitterSystem.EmitAmbientSound( entindex, vecOrigin, samp, vol, soundlevel, fFlags, pitch, soundtime, duration );
 	}
 }
